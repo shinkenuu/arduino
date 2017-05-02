@@ -1,1 +1,7 @@
-This is the README file
+This project was designed with the purpose of testing FreeRTOS for AVR using samaphores (shared resource), queues(message from thread to thread) and thread sync.
+Thus, it fakes a busy resource while the user is trying to send messages from the white LED to the photoresistor at pin 2. Everything is logged in the serial monitor.
+
+To accomplish this test, you need the a circuit like the one in "circuit.png". Please note that I used "1-Way Photo Resistor" <http://www.dx.com/p/1-way-photo-resistor-sensor-module-for-arduino-blue-151310>
+It consists of a photoresistor to receive signal from a external system (in this case, our finger by pressing the button and lighting the white LED), an TX (green LED) to be up to HIGH when our RX (photoresistor) is randomly busy for 0.5 millisecond to 2 seconds. In the meanwhile, a thread is responsible for logging everything in the serial monitor.
+
+In a Real Time System, the most valuable resource and the worse problem we need to concern about is time. With that in mind, we need to assure that our system will complete/deliver/delegate/end a task in the exact needed moment (e.x: log any action and compute the signal in RX every 0.5 millisecond IF our TX resource is not busy)
