@@ -14,11 +14,11 @@ SemaphoreHandle_t rxSemp = NULL;
 QueueHandle_t rxQueue = 0;
 
 /*
- * ListenChannel: 
- * Reads the signal from the thermistor
+ * ListenThread: 
+ * Reads the signal from the photo-resistor at RX_PIN
  * and send it through the rxQueue
  */
-static void ListenChannel(void* pvParameters) {
+static void ListenThread(void* pvParameters) {
 
   pinMode(RX_PIN, INPUT);
   int msg;
@@ -52,7 +52,7 @@ static void ListenChannel(void* pvParameters) {
 
 /*
  * BusyThread: 
- * Fake a busy thread using the tx resource
+ * Fake a busy thread using the RX resource
  */
 static void BusyThread(void* pvParameters) {
 
@@ -93,6 +93,7 @@ static void BusyThread(void* pvParameters) {
 
 /*
  * FeedbackThread
+ * Logs what is at the rxQueue
  */
 static void FeedbackThread(void* pvParameters) {
 
@@ -130,7 +131,7 @@ void setup() {
     while(1);
   }
   
-  s1 = xTaskCreate(ListenChannel, (signed char*)"ListenChannel", sizeof(int) + 200, NULL, 3, NULL);
+  s1 = xTaskCreate(ListenThread, (signed char*)"ListenThread", sizeof(int) + 200, NULL, 3, NULL);
   s2 = xTaskCreate(BusyThread, (signed char*)"BusyThread", 200, NULL, 1, NULL);
   s3 = xTaskCreate(FeedbackThread, (signed char*)"FeedbackThread", sizeof(int) + 200, NULL, 2, NULL);
 
