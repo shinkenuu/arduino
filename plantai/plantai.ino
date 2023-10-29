@@ -1,6 +1,8 @@
 #include <DHT.h>
 
-#define DEBUG 1
+#define DEBUG 0
+
+#define MAX_SOIL_MOISTURE_ANALOG_SIGNAL 1023.0
 // Sensors
 // -- Soil moisture
 // https://www.electronicwings.com/arduino/soil-moisture-sensor-interfacing-with-arduino-uno
@@ -36,7 +38,7 @@ uint8_t PLANTS_COUNT = sizeof(PLANTS) / sizeof(plant_t);
 // ================  SETUP  ================
 // =========================================
 
-void setupPlantSensor(plant_t *plant, uint8_t dhtPin = 22, uint8_t soilPin = A0, uint8_t lightPin = 23)
+void setupPlantSensor(plant_t *plant, uint8_t dhtPin = 53, uint8_t soilPin = A0, uint8_t lightPin = 23)
 {
     Serial.print("DHT pin ");
     Serial.println(dhtPin);
@@ -68,23 +70,27 @@ void setup()
 
     for (uint8_t i = 0; i < PLANTS_COUNT; i++)
     {
-        Serial.println("============================");
-        Serial.print("Setting up plant ");
-        Serial.println(i);
+        if (DEBUG)
+        {
+            Serial.println("============================");
+            Serial.print("Setting up plant ");
+            Serial.println(i);
+        }
 
         plant = &PLANTS[i];
-        serializePlant(plant);
         setupPlantSensor(plant);
 
-        Serial.print("Set up plant ");
-        Serial.println(i);
+        if (DEBUG)
+        {
+            Serial.print("Set up plant ");
+            Serial.println(i);
+        }
     }
 }
 
 // =========================================
 // ================  LOOP  =================
 // =========================================
-
 
 void loop()
 {
@@ -105,9 +111,15 @@ void loop()
 
 float readSoilMoisture(plantSensor_t *sensor)
 {
-    int sensor_analog = analogRead(sensor->soilPin);
+    int analog_signal = analogRead(sensor->soilPin);
     // float moisture_percentage = (100 - ((sensor_analog / 1023.00) * 100));
-    float moisture_percentage = 100 - sensor_analog / 102300.00;
+    float moisture_percentage = analog_signal / MAX_SOIL_MOISTURE_ANALOG_SIGNAL;
+
+    if (DEBUG)
+    {
+        Serial.print("Read soil moisture signal: ");
+        Serial.println(analog_signal);
+    }
 
     return moisture_percentage;
 }
@@ -120,6 +132,12 @@ float readTemperature(plantSensor_t *sensor)
     {
         Serial.println("Failed to temperature from DHT sensor!");
         return -1.0;
+    }
+
+    if (DEBUG)
+    {
+        Serial.print("Read temperature: ");
+        Serial.println(temperature);
     }
 
     return temperature;
@@ -135,12 +153,18 @@ float readHumidity(plantSensor_t *sensor)
         return -1.0;
     }
 
+    if (DEBUG)
+    {
+        Serial.print("Read humidity: ");
+        Serial.println(humidity);
+    }
+
     return humidity;
 }
 
 float readLight(plantSensor_t *sensor)
 {
-    return -1.0;
+    return -2.0;
 }
 
 void readPlantSensors(plant_t *plant)
@@ -162,22 +186,17 @@ void readPlantSensors(plant_t *plant)
 void serializePlant(plant_t *plant)
 {
     Serial.println("============================");
-    Serial.print("ID: ");
+    Serial.print("ID\t\t");
     Serial.println(plant->id);
-    Serial.print("Name: ");
+    Serial.print("Name\t\t");
     Serial.println(plant->name);
 
-    Serial.print("Soil moisture: ");
+    Serial.print("Soil moisture\t");
     Serial.println(plant->soil_moisture);
-    Serial.print("Air temperature: ");
-    Serial.println(plant->soil_moisture);
-    Serial.print("Air humidity: ");
-    Serial.println(plant->soil_moisture);
-    Serial.print("Light level: ");
+    Serial.print("Air temperature\t");
+    Serial.println(plant->temperature);
+    Serial.print("Air humidity\t");
+    Serial.println(plant->humidity);
+    Serial.print("Light level\t");
     Serial.println(plant->light);
-
-    Serial.print("Soil pin: ");
-    Serial.println(plant->sensor->soilPin);
-    Serial.print("Light pin: ");
-    Serial.println(plant->sensor->lightPin);
 }
