@@ -3,11 +3,6 @@
 #define DEBUG 0
 
 #define MAX_SOIL_MOISTURE_ANALOG_SIGNAL 1023.0
-// Sensors
-// -- Soil moisture
-// https://www.electronicwings.com/arduino/soil-moisture-sensor-interfacing-with-arduino-uno
-// -- Temperature & Humidity
-// https://www.electronicwings.com/arduino/dht11-sensor-interfacing-with-arduino-uno
 
 typedef struct
 {
@@ -29,9 +24,10 @@ typedef struct
     plantSensor_t *sensor;
 } plant_t;
 
-plant_t plant0 = {"ID -1", "Subject #-1", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant0 = {"bb3ca75", "Violeta", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant1 = {"2a75cb8", "Bruminha", -1.0, -1.0, -1.0, -1.0, NULL};
 
-plant_t PLANTS[] = {plant0};
+plant_t PLANTS[] = {plant0, plant1};
 uint8_t PLANTS_COUNT = sizeof(PLANTS) / sizeof(plant_t);
 
 // =========================================
@@ -59,7 +55,6 @@ void setupPlantSensor(plant_t *plant, uint8_t dhtPin = 53, uint8_t soilPin = A0,
     sensor->lightPin = lightPin;
 
     plant->sensor = sensor;
-    // memcpy(plant->sensor, &sensor, sizeof(plantSensor_t));
 }
 
 void setup()
@@ -67,6 +62,9 @@ void setup()
     Serial.begin(115200);
 
     plant_t *plant;
+    uint8_t dhtPin = 53;
+    uint8_t soilPin = A0;
+    uint8_t lightPin = 23;
 
     for (uint8_t i = 0; i < PLANTS_COUNT; i++)
     {
@@ -78,7 +76,7 @@ void setup()
         }
 
         plant = &PLANTS[i];
-        setupPlantSensor(plant);
+        setupPlantSensor(plant, dhtPin, soilPin + 1, lightPin);
 
         if (DEBUG)
         {
@@ -101,7 +99,7 @@ void loop()
         plant = &PLANTS[i];
         readPlantSensors(plant);
         serializePlant(plant);
-        delay(2000);
+        delay(3000);
     }
 }
 
