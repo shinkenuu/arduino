@@ -2,6 +2,9 @@
 
 #define DEBUG 0
 
+#define SENSOR_INTERVAL_IN_MILLISECONDS 3000
+#define SERIAL_BAUDRATE 115200
+
 #define MAX_SOIL_MOISTURE_ANALOG_SIGNAL 1023.0
 
 typedef struct
@@ -59,7 +62,7 @@ void setupPlantSensor(plant_t *plant, uint8_t dhtPin = 53, uint8_t soilPin = A0,
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(SERIAL_BAUDRATE);
 
     plant_t *plant;
     uint8_t dhtPin = 53;
@@ -99,7 +102,7 @@ void loop()
         plant = &PLANTS[i];
         readPlantSensors(plant);
         serializePlant(plant);
-        delay(3000);
+        delay(SENSOR_INTERVAL_IN_MILLISECONDS);
     }
 }
 
