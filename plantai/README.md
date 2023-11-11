@@ -17,14 +17,15 @@ Sensors and actuators should be part of a physical plant container, easing the p
 ---
 
 
-##### Sensors
+### References
 
-- Soil moisture
-https://www.electronicwings.com/arduino
-soil-moisture-sensor-interfacing-with-arduino-uno
+##### Sensors 
 
-- Temperature & Humidity
-https://www.electronicwings.com/arduino/dht11-sensor-interfacing-with-arduino-uno
+[Soil moisture](https://www.electronicwings.com/arduino/soil-moisture-sensor-interfacing-with-arduino-uno)
+
+[Temperature & Humidity](https://www.electronicwings.com/arduino/dht11-sensor-interfacing-with-arduino-uno)
 
 
-- Light level
+Light level
+
+---

@@ -131,7 +131,7 @@ float readTemperature(plantSensor_t *sensor)
 
     if (isnan(temperature))
     {
-        Serial.println("Failed to temperature from DHT sensor!");
+        Serial.println("Failed to read temperature from DHT sensor!");
         return -1.0;
     }
 
@@ -150,7 +150,7 @@ float readHumidity(plantSensor_t *sensor)
 
     if (isnan(humidity))
     {
-        Serial.println("Failed to humidity from DHT sensor!");
+        Serial.println("Failed to read humidity from DHT sensor!");
         return -1.0;
     }
 
@@ -186,6 +186,7 @@ void readPlantSensors(plant_t *plant)
 
 void serializePlant(plant_t *plant)
 {
+    Serial.println("<~~~~~~~~~~~~~~~~~~~~~~~~~~>");
     Serial.println("============================");
     Serial.print("ID\t\t");
     Serial.println(plant->id);
@@ -200,4 +201,5 @@ void serializePlant(plant_t *plant)
     Serial.println(plant->humidity);
     Serial.print("Light level\t");
     Serial.println(plant->light);
+    Serial.println("============================");
 }
