@@ -1,6 +1,7 @@
+#include <ArduinoJson.h>
 #include <DHT.h>
 
-#define DEBUG 0
+#define DEBUG false
 
 #define SENSOR_INTERVAL_IN_MILLISECONDS 3000
 #define SERIAL_BAUDRATE 115200
@@ -29,8 +30,9 @@ typedef struct
 
 plant_t plant0 = {"bb3ca75", "Violeta", -1.0, -1.0, -1.0, -1.0, NULL};
 plant_t plant1 = {"2a75cb8", "Bruminha", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant2 = {"c54122a", "Christine", -1.0, -1.0, -1.0, -1.0, NULL};
 
-plant_t PLANTS[] = {plant0, plant1};
+plant_t PLANTS[] = {plant0, plant1, plant2};
 uint8_t PLANTS_COUNT = sizeof(PLANTS) / sizeof(plant_t);
 
 // =========================================
@@ -39,17 +41,17 @@ uint8_t PLANTS_COUNT = sizeof(PLANTS) / sizeof(plant_t);
 
 void setupPlantSensor(plant_t *plant, uint8_t dhtPin = 53, uint8_t soilPin = A0, uint8_t lightPin = 23)
 {
-    Serial.print("DHT pin ");
-    Serial.println(dhtPin);
+    debug("DHT pin ");
+    debugln(dhtPin);
     DHT dht = DHT(dhtPin, DHT11);
     dht.begin();
 
-    Serial.print("soilPin ");
-    Serial.println(soilPin);
+    debug("soilPin ");
+    debugln(soilPin);
     pinMode(soilPin, INPUT);
 
-    Serial.print("lightPin ");
-    Serial.println(lightPin);
+    debug("lightPin ");
+    debugln(lightPin);
     pinMode(lightPin, INPUT);
 
     plantSensor_t *sensor = (plantSensor_t *)malloc(sizeof(plantSensor_t));
@@ -71,21 +73,13 @@ void setup()
 
     for (uint8_t i = 0; i < PLANTS_COUNT; i++)
     {
-        if (DEBUG)
-        {
-            Serial.println("============================");
-            Serial.print("Setting up plant ");
-            Serial.println(i);
-        }
+        debug("Setting up plant ");
+        debugln(i);
 
         plant = &PLANTS[i];
         setupPlantSensor(plant, dhtPin, soilPin + 1, lightPin);
 
-        if (DEBUG)
-        {
-            Serial.print("Set up plant ");
-            Serial.println(i);
-        }
+        debugln("Setup plant");
     }
 }
 
@@ -116,11 +110,8 @@ float readSoilMoisture(plantSensor_t *sensor)
     // float moisture_percentage = (100 - ((sensor_analog / 1023.00) * 100));
     float moisture_percentage = analog_signal / MAX_SOIL_MOISTURE_ANALOG_SIGNAL;
 
-    if (DEBUG)
-    {
-        Serial.print("Read soil moisture signal: ");
-        Serial.println(analog_signal);
-    }
+    debug("Read soil moisture signal: ");
+    debugln(analog_signal);
 
     return moisture_percentage;
 }
@@ -131,15 +122,12 @@ float readTemperature(plantSensor_t *sensor)
 
     if (isnan(temperature))
     {
-        Serial.println("Failed to read temperature from DHT sensor!");
+        debugln("Failed to read temperature from DHT sensor!");
         return -1.0;
     }
 
-    if (DEBUG)
-    {
-        Serial.print("Read temperature: ");
-        Serial.println(temperature);
-    }
+    debug("Read temperature ");
+    debugln(temperature);
 
     return temperature;
 }
@@ -150,15 +138,12 @@ float readHumidity(plantSensor_t *sensor)
 
     if (isnan(humidity))
     {
-        Serial.println("Failed to read humidity from DHT sensor!");
+        debugln("Failed to read humidity from DHT sensor!");
         return -1.0;
     }
 
-    if (DEBUG)
-    {
-        Serial.print("Read humidity: ");
-        Serial.println(humidity);
-    }
+    debug("Read humidity: ");
+    debugln(humidity);
 
     return humidity;
 }
@@ -184,22 +169,41 @@ void readPlantSensors(plant_t *plant)
 // =================  COMM  ================
 // =========================================
 
-void serializePlant(plant_t *plant)
+void serializePlant(const plant_t *plant)
 {
-    Serial.println("<~~~~~~~~~~~~~~~~~~~~~~~~~~>");
-    Serial.println("============================");
-    Serial.print("ID\t\t");
-    Serial.println(plant->id);
-    Serial.print("Name\t\t");
-    Serial.println(plant->name);
+    StaticJsonDocument<256> doc;
 
-    Serial.print("Soil moisture\t");
-    Serial.println(plant->soil_moisture);
-    Serial.print("Air temperature\t");
-    Serial.println(plant->temperature);
-    Serial.print("Air humidity\t");
-    Serial.println(plant->humidity);
-    Serial.print("Light level\t");
-    Serial.println(plant->light);
-    Serial.println("============================");
+    doc["id"] = plant->id;
+    doc["name"] = plant->name;
+    doc["soil_moisture"] = plant->soil_moisture;
+    doc["temperature"] = plant->temperature;
+    doc["humidity"] = plant->humidity;
+    doc["light"] = plant->light;
+
+    serializeJson(doc, Serial);
+    Serial.println();
+}
+
+void debugln(const uint8_t message)
+{
+    if (DEBUG)
+    {
+        Serial.println(message);
+    }
+}
+
+void debug(const char *message)
+{
+    if (DEBUG)
+    {
+        Serial.print(message);
+    }
+}
+
+void debugln(const char *message)
+{
+    if (DEBUG)
+    {
+        Serial.println(message);
+    }
 }
