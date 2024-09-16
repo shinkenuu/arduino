@@ -17,8 +17,8 @@ typedef struct
 
 typedef struct
 {
-    char id[10];
-    char name[30];
+    String id;
+    String name;
 
     float soil_moisture; // %
     float temperature;   // Celsius
@@ -28,11 +28,12 @@ typedef struct
     plantSensor_t *sensor;
 } plant_t;
 
-plant_t plant0 = {"bb3ca75", "Violeta", -1.0, -1.0, -1.0, -1.0, NULL};
-plant_t plant1 = {"2a75cb8", "Bruminha", -1.0, -1.0, -1.0, -1.0, NULL};
-plant_t plant2 = {"c54122a", "Christine", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant0 = {"bb3ca75", "Violenta", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant1 = {"2a75cb8", "Medusa", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant2 = {"c54122a", "Vincent", -1.0, -1.0, -1.0, -1.0, NULL};
+plant_t plant3 = {"b7ca5ca", "Greeny", -1.0, -1.0, -1.0, -1.0, NULL};
 
-plant_t PLANTS[] = {plant0, plant1, plant2};
+plant_t PLANTS[] = {plant0, plant1, plant2, plant3};
 uint8_t PLANTS_COUNT = sizeof(PLANTS) / sizeof(plant_t);
 
 // =========================================
@@ -77,7 +78,7 @@ void setup()
         debugln(i);
 
         plant = &PLANTS[i];
-        setupPlantSensor(plant, dhtPin, soilPin + 1, lightPin);
+        setupPlantSensor(plant, dhtPin, soilPin + i, lightPin);
 
         debugln("Setup plant");
     }
@@ -87,17 +88,50 @@ void setup()
 // ================  LOOP  =================
 // =========================================
 
+// void loop()
+// {
+//     plant_t *plant;
+
+//     for (uint8_t i = 0; i < PLANTS_COUNT; i++)
+//     {
+//         plant = &PLANTS[i];
+//         readPlantSensors(plant);
+//         serializePlant(plant);
+//         delay(SENSOR_INTERVAL_IN_MILLISECONDS);
+//         delay(2 * 1000);
+//     }
+// }
+
 void loop()
 {
-    plant_t *plant;
+    String plantName = "";
 
-    for (uint8_t i = 0; i < PLANTS_COUNT; i++)
-    {
-        plant = &PLANTS[i];
-        readPlantSensors(plant);
-        serializePlant(plant);
-        delay(SENSOR_INTERVAL_IN_MILLISECONDS);
+    if (Serial.available() > 0) {
+      plantName = Serial.readStringUntil('\n');
     }
+
+    if (plantName == "") {
+      return;
+    }
+
+    short i;
+    for (i = 0; i < sizeof(PLANTS) / sizeof(plant_t*); i++) {
+      
+      plant_t *plant =  &PLANTS[i];
+
+      if (plant->name != plantName) {
+        continue;
+      }
+
+      readPlantSensors(plant);
+      serializePlant(plant);
+
+      plantName = "";
+      return;
+    }
+
+    debug("No plant found with name ");
+    debugln(plantName);
 }
 
 // =========================================
@@ -192,7 +226,7 @@ void debugln(const uint8_t message)
     }
 }
 
-void debug(const char *message)
+void debug(String message)
 {
     if (DEBUG)
     {
@@ -200,7 +234,7 @@ void debug(const char *message)
     }
 }
 
-void debugln(const char *message)
+void debugln(String message)
 {
     if (DEBUG)
     {
