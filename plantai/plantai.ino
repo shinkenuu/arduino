@@ -8,6 +8,7 @@
 #define SERIAL_BAUDRATE 115200
 
 #define MAX_SOIL_MOISTURE_ANALOG_SIGNAL 1023.0
+#define MAX_LIGHT_ANALOG_SIGNAL 1023.0
 
 
 // =========================================
@@ -302,7 +303,11 @@ float readHumidity(plantSensor_t *sensor) {
 }
 
 float readLight(plantSensor_t *sensor) {
-  return -2.0;
+  int lightSignal = analogRead(sensor->lightPin);
+  float lightPercentage = (lightSignal / MAX_LIGHT_ANALOG_SIGNAL) * 100.0;
+  debug("Read light: ");
+  debugln(lightSignal);
+  return lightPercentage;
 }
 
 void readPlantSensors(plant_t *plant) {
