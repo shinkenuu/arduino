@@ -36,12 +36,10 @@ Sensors and actuators should be part of a physical plant container, easing the p
 }
 ```
 
-3. Create - Let Arduino know about a plant with default pins
-
-TODO: also define which are its sensors and actuators pins along with the plant's name
+3. Create - Let Arduino know about a plant with its sensors
 
 ```
->>> +PLANT_NAME
+>>> +{"name":"PLANT_NAME","pins":{"soil":2,"dht":3,"light":4}}
 <<< {
     // created plant
 }
@@ -65,6 +63,6 @@ TODO: also define which are its sensors and actuators pins along with the plant'
 
 [Temperature & Humidity](https://www.electronicwings.com/arduino/dht11-sensor-interfacing-with-arduino-uno)
 
-Light level
+[Light level](https://www.instructables.com/Arduino-and-a-LDR-Light-Dependent-Resistor/)
 
 ---

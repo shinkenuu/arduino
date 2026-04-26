@@ -102,8 +102,20 @@ void loop() {
   debugln("args: |" + args + "|");
 
   switch (operation) {
-    case '+':
-      plant = createPlant("_id", args, 53, A0, 23);
+    case '+': {
+      StaticJsonDocument<256> doc;
+      DeserializationError error = deserializeJson(doc, args);
+      if (error) {
+        serializeError("invalid JSON");
+        break;
+      }
+
+      String name = doc["name"].as<String>();
+      uint8_t soilPin = doc["soil"].as<uint8_t>();
+      uint8_t dhtPin = doc["dht"].as<uint8_t>();
+      uint8_t lightPin = doc["light"].as<uint8_t>();
+
+      plant = createPlant("_id", name, dhtPin, soilPin, lightPin);
       if (plant == NULL) {
         serializeError("plant not created");
         break;
@@ -111,6 +123,7 @@ void loop() {
       readPlantSensors(plant);
       serializePlant(plant);
       break;
+    }
     case '-':
       plantId = deletePlant(args);
       if (plantId == "") {
