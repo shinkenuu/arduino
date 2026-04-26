@@ -63,6 +63,6 @@ Sensors and actuators should be part of a physical plant container, easing the p
 
 [Temperature & Humidity](https://www.electronicwings.com/arduino/dht11-sensor-interfacing-with-arduino-uno)
 
-[Light level](https://www.instructables.com/Arduino-and-a-LDR-Light-Dependent-Resistor/)
+[Light level](https://learn.sparkfun.com/tutorials/temt6000-ambient-light-sensor-hookup-guide/all#programm)
 
 ---

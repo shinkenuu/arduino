@@ -7,8 +7,7 @@
 #define SENSOR_INTERVAL_IN_MILLISECONDS 3000
 #define SERIAL_BAUDRATE 115200
 
-#define MAX_SOIL_MOISTURE_ANALOG_SIGNAL 1023.0
-#define MAX_LIGHT_ANALOG_SIGNAL 1023.0
+#define MAX_ANALOG_SIGNAL 1023.0
 
 
 // =========================================
@@ -72,7 +71,7 @@ void setup() {
 
     uint8_t dhtPin = 53;
     uint8_t soilPin = A0;
-    uint8_t lightPin = 23;
+    uint8_t lightPin = A8;
 
     String names[] = { "Vincent", "Violenta" };
 
@@ -278,8 +277,7 @@ void serializeError(String errorMessage) {
 
 float readSoilMoisture(plantSensor_t *sensor) {
   int analog_signal = analogRead(sensor->soilPin);
-  // float moisture_percentage = (100 - ((sensor_analog / 1023.00) * 100));
-  float moisture_percentage = analog_signal / MAX_SOIL_MOISTURE_ANALOG_SIGNAL;
+  float moisture_percentage = analog_signal / MAX_ANALOG_SIGNAL;
 
   debug("Read soil moisture signal: ");
   debugln(analog_signal);
@@ -317,9 +315,11 @@ float readHumidity(plantSensor_t *sensor) {
 
 float readLight(plantSensor_t *sensor) {
   int lightSignal = analogRead(sensor->lightPin);
-  float lightPercentage = (lightSignal / MAX_LIGHT_ANALOG_SIGNAL) * 100.0;
+  float lightPercentage = lightSignal / MAX_ANALOG_SIGNAL;
+
   debug("Read light: ");
   debugln(lightSignal);
+
   return lightPercentage;
 }
 
