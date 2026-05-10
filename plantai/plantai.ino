@@ -306,12 +306,17 @@ float readHumidity(plantSensor_t *sensor) {
 
 float readLight(plantSensor_t *sensor) {
   int lightSignal = analogRead(sensor->lightPin);
-  float lightPercentage = lightSignal / MAX_ANALOG_SIGNAL;
+
+  // Calculate volts: lightSignal * (5.0 Volts / 1023.0 Analog)
+  // Calculate amps: Volts / 10000 (Ohm)
+  // Calculate microamps: Amps * 1_000_000
+  // Resulting conversion factor: (5 / 1023) * (1 / 1_000_000) = 0.4887
+  float lux = lightSignal * 0.4887;
 
   debug("Read light: ");
   debugln(lightSignal);
 
-  return lightPercentage;
+  return lux;
 }
 
 void readPlantSensors(plant_t *plant) {
