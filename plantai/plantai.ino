@@ -4,7 +4,6 @@
 #define DEBUG 0
 #define MAX_PLANTS 16
 
-#define SENSOR_INTERVAL_IN_MILLISECONDS 3000
 #define SERIAL_BAUDRATE 115200
 
 #define MAX_ANALOG_SIGNAL 1023.0
@@ -23,13 +22,12 @@ typedef struct
 
 typedef struct
 {
-  String id;
   String name;
 
-  float soil_moisture;  // %
+  float soil_moisture;  // 0.0 -> 1.0
   float temperature;    // Celsius
-  float humidity;       // %
-  float light;          // %
+  float humidity;       // 0.0 -> 1.0
+  float light;          // 0.0 -> 1.0
 
   plantSensor_t *sensor;
 } plant_t;
@@ -77,7 +75,7 @@ void setup() {
 
 
     for (uint8_t i = 0; i < 2; i++) {
-      createPlant(String(i), String(names[i]), dhtPin, soilPin + i, lightPin);
+      createPlant(String(names[i]), dhtPin, soilPin + i, lightPin);
     }
   }
 }
@@ -89,7 +87,7 @@ void loop() {
   }
 
   plant_t *plant = NULL;
-  String plantId;
+  String plantDeleted;
 
   String command = Serial.readString();
   command.trim();
@@ -114,7 +112,7 @@ void loop() {
       uint8_t dhtPin = doc["dht"].as<uint8_t>();
       uint8_t lightPin = doc["light"].as<uint8_t>();
 
-      plant = createPlant("_id", name, dhtPin, soilPin, lightPin);
+      plant = createPlant(name, dhtPin, soilPin, lightPin);
       if (plant == NULL) {
         serializeError("plant not created");
         break;
@@ -124,12 +122,12 @@ void loop() {
       break;
     }
     case '-':
-      plantId = deletePlant(args);
-      if (plantId == "") {
+      plantDeleted = deletePlant(args);
+      if (!plantDeleted) {
         serializeError("plant named" + args + " not deleted");
         break;
       }
-      Serial.println("{\"id\": \"" + plantId + "\"}");
+      Serial.println("{\"name\": \"" + args + "\"}");
       break;
     case '=':
       debugln("Retriving");
@@ -154,7 +152,7 @@ void loop() {
 // ==============    API    ================
 // =========================================
 
-plant_t *createPlant(const String id, const String name, uint8_t dhtPin, uint8_t soilPin, uint8_t lightPin) {
+plant_t *createPlant(const String name, uint8_t dhtPin, uint8_t soilPin, uint8_t lightPin) {
   debugln("Creating Plant " + name);
 
   if (numPlants >= MAX_PLANTS) {
@@ -163,7 +161,6 @@ plant_t *createPlant(const String id, const String name, uint8_t dhtPin, uint8_t
   }
 
   plant_t plant;
-  plant.id = id;
   plant.name = name;
   setupPlantSensor(&plant, dhtPin, soilPin, lightPin);
 
@@ -174,15 +171,11 @@ plant_t *createPlant(const String id, const String name, uint8_t dhtPin, uint8_t
   return &PLANTS[numPlants - 1];
 }
 
-String deletePlant(String name) {
+bool deletePlant(String name) {
   debugln("Deleting Plant " + name);
-
-  String deletedPlantId = "";
 
   for (uint8_t i = 0; i < numPlants; i++) {
     if (PLANTS[i].name != name) continue;
-
-    deletedPlantId = PLANTS[i].id;
 
     // Shift remaining plants to fill the gap
     for (uint8_t j = i; j < numPlants - 1; j++) {
@@ -192,11 +185,11 @@ String deletePlant(String name) {
     numPlants--;
 
     debugln("Plant deleted @ " + String(i));
-    return deletedPlantId;
+    return true;
   }
 
   debugln("Plant not found.");
-  return "";
+  return false;
 }
 
 plant_t *retrievePlant(String name) {
@@ -231,7 +224,6 @@ void serializePlants() {
     StaticJsonDocument<64> _doc;
     JsonObject plantJson = _doc.to<JsonObject>();
 
-    plantJson["id"] = PLANTS[i].id;
     plantJson["name"] = PLANTS[i].name;
     plantJson["soil_moisture"] = PLANTS[i].soil_moisture;
     plantJson["temperature"] = PLANTS[i].temperature;
@@ -250,7 +242,6 @@ void serializePlant(const plant_t *plant) {
 
   StaticJsonDocument<256> doc;
 
-  doc["id"] = plant->id;
   doc["name"] = plant->name;
   doc["soil_moisture"] = plant->soil_moisture;
   doc["temperature"] = plant->temperature;
@@ -329,9 +320,9 @@ void readPlantSensors(plant_t *plant) {
   sensor = plant->sensor;
 
   plant->soil_moisture = readSoilMoisture(sensor);
+  plant->light = readLight(sensor);
   plant->temperature = readTemperature(sensor);
   plant->humidity = readHumidity(sensor);
-  plant->light = readLight(sensor);
 }
 
 
