@@ -57,6 +57,8 @@ Sensors and actuators should be part of a physical plant container, easing the p
 
 ### References
 
+[How 2 Electronics / Arduino tutorials](https://how2electronics.com/arduino-projects/)
+
 ##### Sensors 
 
 [Soil moisture](https://www.electronicwings.com/arduino/soil-moisture-sensor-interfacing-with-arduino-uno)
